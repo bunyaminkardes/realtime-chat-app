@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Realtime Chat App</title>
+    </head>
+    <body>
+        <input type="text" id="messageInput" placeholder="mesajınızı girin...">
+        <button type="button" id="sendButton">Gönder</button>
+        <ul id="messageList"></ul>
+    </body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let sendButton = document.getElementById("sendButton");
+        let messageList = document.getElementById("messageList");
+
+        let socket = io();
+
+        sendButton.addEventListener('click', () => {
+            let message =  document.getElementById("messageInput").value; //gönder butonuna tıklanıldığı anda mesajı değişkene atalım.
+            socket.emit('sendMessage', message); //sendMessage adlı bir olay oluşturup mesajla birlikte server'a at.
+            document.getElementById("messageInput").value = ""; //mesaj gönderdikten sonra input alanı temizlensin.
+        });
+
+        //sunucuda receiveMessage adlı bir olay tetiklenirse bu kod parçası çalışacak :
+        socket.on('receiveMessage', (message) => {
+            const li = document.createElement('li');
+            li.textContent = message;
+            messageList.append(li);
+        });
+    </script>
+</html>
