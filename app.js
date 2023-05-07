@@ -4,24 +4,56 @@ const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
+const router = require("./routes.js");
 
+const bodyParser = require('body-parser');
+const session = require("express-session"); // ############### SESSION ###############
+
+app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended : true}));
+app.use(session({ // ############### SESSION ###############
+    secret: 'mysecret',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use('/', router);
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+
+let katilimcilar = [];
+let messages = []; 
 
 //herhangi biri bağlandığında bu kod parçası çalışacak :
 io.on('connection', (socket) => {
-    console.log('kullanıcı bağlandı.');
+
+    console.log('kullanıcı bağlandı.' + socket.id);
+
+    //clientten yeni katılımcı bağlandı olayını dinle.
+    socket.on('sendYeniKatilimciBaglandi', (username) => {
+        // yeni katılımcı geldiğinde diziye push et.
+        const katilimci = { name: username };
+
+        katilimcilar.push(katilimci);
+        //yeni listeyi tüm clientlara yolla.
+        io.emit('katilimciListele', (katilimcilar));
+    });
+
+    //herhangi biri bağlandığında son mesajları görmesi için istemciye 
+    socket.emit('initializeMessages', messages);
 
     //istemcideki send message adlı olayı dinleyelim. böyle bir olayın istemcide tanımlı olması gerekiyor.
     //message adlı parametre, send message adlı olay tetiklenirse istemci tarafından yollanacak.
-    socket.on('sendMessage', (message) => {
+    socket.on('sendMessage', (messageData) => {
         //send message olayı gerçekleşirse istemcideki receive message olayını io.emit() ile tetikle.
         //olayı io.emit() ile tetiklemek mesajın bütün bağlı istemcilere gitmesini sağlar.
         //aynı şekilde receive message olayının da istemci tarafında tanımlı olması gerekir bu arada.
-        io.emit('receiveMessage', message);
+        messages.push(messageData);
+        if(messages.length > 500) { //mesaj sayısı 500'ü geçerse ilk mesajı kaldırarak mesaj dizisini sınırlı tut.
+            messages.shift();
+        }
+        io.emit('receiveMessage', messageData);
+        console.log(messages);
     });
 
     //herhangi birinin bağlantısı koptuğunda bu kod parçası çalışacak :
@@ -30,7 +62,7 @@ io.on('connection', (socket) => {
     });
 })
 
-server.listen(process.env.PORT);
+server.listen(3000);
 
 
 
