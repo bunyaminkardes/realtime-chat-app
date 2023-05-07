@@ -5,6 +5,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 const router = require("./routes.js");
+const data = require("./data.js");
 
 const bodyParser = require('body-parser');
 const session = require("express-session"); // ############### SESSION ###############
@@ -12,7 +13,7 @@ const session = require("express-session"); // ############### SESSION #########
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ // ############### SESSION ###############
     secret: 'mysecret',
     resave: false,
@@ -20,27 +21,29 @@ app.use(session({ // ############### SESSION ###############
 }));
 app.use('/', router);
 
-
-let katilimcilar = [];
-let messages = []; 
-
 //herhangi biri bağlandığında bu kod parçası çalışacak :
 io.on('connection', (socket) => {
 
-    console.log('kullanıcı bağlandı.' + socket.id);
+    console.log(socket.id + 'id numarasına sahip bir kullanıcı bağlandı.');
 
     //clientten yeni katılımcı bağlandı olayını dinle.
     socket.on('sendYeniKatilimciBaglandi', (username) => {
-        // yeni katılımcı geldiğinde diziye push et.
-        const katilimci = { name: username };
-
-        katilimcilar.push(katilimci);
+        const katilimci = { id: socket.id, name: username };
+        /*
+            sayfa her yenilendiğinde aynı kullanıcı adı tekrar server'a yollanacak.
+            bunu engellemek için, yollanan kullanıcı adı katılımcılar listesinde var mı şeklinde
+            bir kontrol yapmak gerekir. eğer yoksa katılımcıyı listeye ekleyip tüm client'lara yollayalım.
+        */
+        const isExist = data.katilimcilar.some((katilimci) => katilimci.name === username);
+        if (!isExist) {
+            data.katilimcilar.push(katilimci);
+        }
         //yeni listeyi tüm clientlara yolla.
-        io.emit('katilimciListele', (katilimcilar));
+        io.emit('katilimciListele', (data.katilimcilar));
     });
 
-    //herhangi biri bağlandığında son mesajları görmesi için istemciye 
-    socket.emit('initializeMessages', messages);
+    //herhangi biri bağlandığında son mesajları görmesi için ilgili istemcideki olayı tetikle.
+    socket.emit('initializeMessages', data.messages);
 
     //istemcideki send message adlı olayı dinleyelim. böyle bir olayın istemcide tanımlı olması gerekiyor.
     //message adlı parametre, send message adlı olay tetiklenirse istemci tarafından yollanacak.
@@ -48,21 +51,32 @@ io.on('connection', (socket) => {
         //send message olayı gerçekleşirse istemcideki receive message olayını io.emit() ile tetikle.
         //olayı io.emit() ile tetiklemek mesajın bütün bağlı istemcilere gitmesini sağlar.
         //aynı şekilde receive message olayının da istemci tarafında tanımlı olması gerekir bu arada.
-        messages.push(messageData);
-        if(messages.length > 500) { //mesaj sayısı 500'ü geçerse ilk mesajı kaldırarak mesaj dizisini sınırlı tut.
-            messages.shift();
+        data.messages.push(messageData);
+        if (data.messages.length > 500) { //mesaj sayısı 500'ü geçerse ilk mesajı kaldırarak mesaj dizisini sınırlı tut.
+            data.messages.shift();
         }
         io.emit('receiveMessage', messageData);
-        console.log(messages);
+        console.log(data.messages);
     });
 
     //herhangi birinin bağlantısı koptuğunda bu kod parçası çalışacak :
     socket.on('disconnect', () => {
-        console.log("kullanıcı disconnect oldu.");
+        console.log(socket.id + "id numarasına sahip bir kullanıcı disconnect oldu.");
+        /*
+            eğer bir kullanıcı çıkış yaparsa veya disconnect olursa, aynı şey olacak.
+            artık bağlantıda olmayacaklar. bu durumda katılımcı dizisinde onların id
+            numarasına sahip olan kısmı bulup listeden kaldıralım ve yeni listeyi
+            bağlantıdaki diğer tüm clientlera tekrar atalım.
+        */
+        const disconnectedUser = data.katilimcilar.find((katilimci) => katilimci.id === socket.id);
+        if (disconnectedUser) {
+            data.katilimcilar = data.katilimcilar.filter((katilimci) => katilimci.id !== socket.id);
+            io.emit('katilimciListele', data.katilimcilar);
+        }
     });
 })
 
-server.listen(3000);
+server.listen(process.env.PORT);
 
 
 

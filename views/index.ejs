@@ -1,71 +1,78 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title> <%= title %> </title>
-    </head>
-    <body>
 
-        <h3>index(chat) sayfasındasın.</h3>
+<head>
+    <title>
+        <%= title %>
+    </title>
+</head>
 
-        <span> <%= user %> </span>
+<body>
 
-        <input type="text" id="messageInput" placeholder="mesajınızı girin...">
-        <button type="button" id="sendButton">Gönder</button>
-        <ul id="messageList"></ul>
-<h3>KATILIMCILAR :</h3>
-<div id="participantsList"></div>
-    </body>
+    <h3>index(chat) sayfasındasın.</h3>
+
+    <span>
+        <%= user %>
+    </span>
+
+    <input type="text" id="messageInput" placeholder="mesajınızı girin..." autocomplete="off">
+    <button type="button" id="sendButton">Gönder</button>
+    <ul id="messageList"></ul>
+
+    <h3>KATILIMCILAR :</h3>
+    <div id="participantsList"></div>
+</body>
 
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        let socket = io();
-let participantsList = document.getElementById("participantsList");
-        let sendButton = document.getElementById("sendButton");
-        let messageList = document.getElementById("messageList");
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let socket = io();
 
-        //kullanıcı bağlandığında server'a kimliği yolla.
-        socket.emit("sendYeniKatilimciBaglandi", "<%= user %>");
+    let participantsList = document.getElementById("participantsList");
+    let sendButton = document.getElementById("sendButton");
+    let messageList = document.getElementById("messageList");
 
-        sendButton.addEventListener('click', () => {
-            const now = new Date();
-            let messageData = {
-                message: document.getElementById("messageInput").value,
-                sender: "<%= user %>",
-                date: now.getHours() + ":" + now.getMinutes()
-            }
-            socket.emit('sendMessage', messageData); //sendMessage adlı bir olay oluşturup mesajla birlikte server'a at.
-            document.getElementById("messageInput").value = ""; //mesaj gönderdikten sonra input alanı temizlensin.
-        });
+    //kullanıcı bağlandığında server'a kimliği yolla.
+    socket.emit("sendYeniKatilimciBaglandi", "<%= user %>");
 
-        //sunucuda receiveMessage adlı bir olay tetiklenirse bu kod parçası çalışacak :
-        socket.on('receiveMessage', (messageData) => {
+    sendButton.addEventListener('click', () => {
+        const now = new Date();
+        let messageData = {
+            message: document.getElementById("messageInput").value,
+            sender: "<%= user %>",
+            date: now.getHours() + ":" + now.getMinutes()
+        }
+        socket.emit('sendMessage', messageData); //sendMessage adlı bir olay oluşturup mesajla birlikte server'a at.
+        document.getElementById("messageInput").value = ""; //mesaj gönderdikten sonra input alanı temizlensin.
+    });
+
+    //sunucuda receiveMessage adlı bir olay tetiklenirse bu kod parçası çalışacak :
+    socket.on('receiveMessage', (messageData) => {
+        const li = document.createElement('li');
+        li.textContent = messageData.sender + ":" + messageData.message + "tarih : " + messageData.date;
+        messageList.append(li);
+    });
+
+    socket.on('katilimciListele', (participants) => {
+        participantsList.innerHTML = '';
+        for (let i = 0; i < participants.length; i++) {
+            const participant = participants[i];
+            const participantElement = document.createElement('div');
+            participantElement.textContent = participant.name;
+            participantsList.appendChild(participantElement);
+        }
+    });
+
+    socket.on('initializeMessages', (messages) => {
+        // Mesajları görüntülemek için messageList'i güncelle
+        messageList.innerHTML = ""; // Önceki mesajları temizle
+        messages.forEach((messageData) => {
             const li = document.createElement('li');
             li.textContent = messageData.sender + ":" + messageData.message + "tarih : " + messageData.date;
             messageList.append(li);
         });
-
-        socket.on('katilimciListele', (participants) => {
-//participantsList.innerHTML = '';
-
-for (let i = 0; i < participants.length; i++) {
-  const participant = participants[i];
-  const participantElement = document.createElement('div');
-  participantElement.textContent = participant.name;
-  participantsList.appendChild(participantElement);
-}
-        });
-        
-        socket.on('initializeMessages', (messages) => {
-            // Mesajları görüntülemek için messageList'i güncelle
-            messageList.innerHTML = ""; // Önceki mesajları temizle
-            messages.forEach((messageData) => {
-                const li = document.createElement('li');
-                li.textContent = messageData.sender + ":" + messageData.message + "tarih : " + messageData.date;
-                messageList.append(li);
-            });
-        });
-    </script>
+    });
+</script>
 
 
 </html>
