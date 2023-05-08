@@ -1,4 +1,4 @@
-let katilimcilar = [];
-let messages = [];
+const katilimcilar = [];
+const messages = [];
 
 module.exports = {katilimcilar, messages};

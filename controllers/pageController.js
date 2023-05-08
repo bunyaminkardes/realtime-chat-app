@@ -5,7 +5,12 @@ pageController.getIndexPage = (req, res) => {
         res.redirect('/login');
     }
     else {
-        res.render('index', {title : 'realtime chat app', user : req.session.loggedUser});
+        const data = {
+            title : 'realtime chat app',
+            user : req.session.loggedUser,
+            room : req.session.room
+        }
+        res.render('index', {data});
     }
 }
 

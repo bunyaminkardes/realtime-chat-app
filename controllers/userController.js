@@ -5,6 +5,7 @@ userController.login = (req, res) => {
     const isUserExist = data.katilimcilar.find((katilimci) => katilimci.name === req.body.kullaniciAdi);
     if(!isUserExist) {
         req.session.loggedUser = req.body.kullaniciAdi;
+        req.session.room = req.body.oda;
         res.redirect('/');
     }
     else {

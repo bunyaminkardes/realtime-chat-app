@@ -24,26 +24,40 @@ app.use('/', router);
 //herhangi biri bağlandığında bu kod parçası çalışacak :
 io.on('connection', (socket) => {
 
-    console.log(socket.id + 'id numarasına sahip bir kullanıcı bağlandı.');
+    socket.on('odayaKatil', (room) => {
+        socket.join(room);
+        console.log("şu odaya katıldık : " + room);
+        console.log(socket.id + " " + "id no'lu kullanıcı" + " " + room + " " + "isimli odaya katıldı.");
+    });
 
     //clientten yeni katılımcı bağlandı olayını dinle.
-    socket.on('sendYeniKatilimciBaglandi', (username) => {
-        const katilimci = { id: socket.id, name: username };
+    socket.on('yeniKatilimciBaglandi', (_katilimci) => {
+        let katilimci = { id: socket.id, kullaniciAdi: _katilimci.kullaniciAdi, oda: _katilimci.oda };
         /*
             sayfa her yenilendiğinde aynı kullanıcı adı tekrar server'a yollanacak.
             bunu engellemek için, yollanan kullanıcı adı katılımcılar listesinde var mı şeklinde
             bir kontrol yapmak gerekir. eğer yoksa katılımcıyı listeye ekleyip tüm client'lara yollayalım.
         */
-        const isExist = data.katilimcilar.some((katilimci) => katilimci.name === username);
+       const isExist = data.katilimcilar.some((katilimci) => katilimci.kullaniciAdi === _katilimci.kullaniciAdi);
         if (!isExist) {
             data.katilimcilar.push(katilimci);
+            /*
+                yapmamız gereken ek bir kontrol var. odaya yeni biri bağlandığında yeni listeyi tüm kullanıcılara
+                atacağız ancak sadece bulunulan odadaki kullanıcıların listesi atılmalı. aksi taktirde tüm odalardaki
+                kullanıcıların listesi atılacak. bu yüzden filtre yapalım :
+            */
+            const katilimcilarOdaFiltresi = data.katilimcilar.filter((katilimci) => katilimci.oda === _katilimci.oda);
+            //nihai olarak filtrelenmiş diziyi odadaki tüm kullanıcılara yayalım:
+            io.to(_katilimci.oda).emit('katilimciListele', katilimcilarOdaFiltresi );
         }
-        //yeni listeyi tüm clientlara yolla.
-        io.emit('katilimciListele', (data.katilimcilar));
+
+        const mesajFiltresi = data.messages.filter((message) => message.room === _katilimci.oda);
+            //herhangi biri bağlandığında son mesajları görmesi için ilgili istemcideki olayı tetikle.
+    //const mesajFiltresi = data.messages.filter((message) => message.room === socket.room);
+    socket.emit('mesajlariYukle', mesajFiltresi);
     });
 
-    //herhangi biri bağlandığında son mesajları görmesi için ilgili istemcideki olayı tetikle.
-    socket.emit('initializeMessages', data.messages);
+
 
     //istemcideki send message adlı olayı dinleyelim. böyle bir olayın istemcide tanımlı olması gerekiyor.
     //message adlı parametre, send message adlı olay tetiklenirse istemci tarafından yollanacak.
@@ -55,13 +69,12 @@ io.on('connection', (socket) => {
         if (data.messages.length > 500) { //mesaj sayısı 500'ü geçerse ilk mesajı kaldırarak mesaj dizisini sınırlı tut.
             data.messages.shift();
         }
-        io.emit('receiveMessage', messageData);
-        console.log(data.messages);
+        const mesajFiltresi = data.messages.filter((message) => message.room === messageData.room);
+        io.to(messageData.room).emit('receiveMessage', mesajFiltresi);
     });
 
     //herhangi birinin bağlantısı koptuğunda bu kod parçası çalışacak :
     socket.on('disconnect', () => {
-        console.log(socket.id + "id numarasına sahip bir kullanıcı disconnect oldu.");
         /*
             eğer bir kullanıcı çıkış yaparsa veya disconnect olursa, aynı şey olacak.
             artık bağlantıda olmayacaklar. bu durumda katılımcı dizisinde onların id
@@ -71,7 +84,7 @@ io.on('connection', (socket) => {
         const disconnectedUser = data.katilimcilar.find((katilimci) => katilimci.id === socket.id);
         if (disconnectedUser) {
             data.katilimcilar = data.katilimcilar.filter((katilimci) => katilimci.id !== socket.id);
-            io.emit('katilimciListele', data.katilimcilar);
+            io.to(disconnectedUser.oda).emit('katilimciListele', data.katilimcilar);
         }
     });
 })
