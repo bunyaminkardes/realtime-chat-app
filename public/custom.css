@@ -1,0 +1,66 @@
+body
+{
+    background-color: #6e6d6d !important;
+    color:#fff !important;
+}
+.icerigi-yatay-dikey-ortala
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#messageInput
+{
+    width: 90%;
+}
+#mesajGonderButonu
+{
+    width: 10%;
+    border:none;
+    margin-left:10px;
+}
+
+#mesajListesi li
+{
+    display: block;
+    min-height: 50px;
+    padding:5px;
+    background-color: rgba(46, 23, 115, 0.4);
+    border-radius: 3px 3px 3px 3px;
+    margin-top:15px;
+    word-wrap: break-word;
+    white-space: pre-line; /* js'de slash n ile alt satıra gecmek icin. */
+    margin-bottom:15px;
+}
+
+
+#katilimcilarBaslik
+{
+    font-size: 24px;
+    font-weight: bold;
+    margin-top:10px;
+    margin-bottom:10px;
+    text-align: center;
+}
+#katilimciListesi div
+{
+    min-height: 50px;
+    margin-bottom:10px;
+    background-color: rgba(55, 29, 128, 0.9);
+
+    padding-left: 10px;
+    padding-right: 10px;
+
+    text-align: center;
+    line-height: 50px;
+
+    border-radius: 3px 3px 3px 3px;
+    
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#katilimciListesi div:hover
+{
+    background-color: rgba(55, 29, 128, 0.3);
+}

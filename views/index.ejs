@@ -1,16 +1,37 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta charset="utf-8">
         <title><%= data.title %></title>
+        <link rel="stylesheet" href="custom.css">
+        <link rel="stylesheet" href="bootstrap.4.0.0.min.css">
     </head>
     <body>
-        <h3>index(chat) sayfasındasın.</h3>
-        <span>kullanıcı adınız : <%= data.user %> bulunduğunuz oda : <%= data.room %></span>
-        <input type="text" id="messageInput" placeholder="mesajınızı girin..." autocomplete="off">
-        <button type="button" id="mesajGonderButonu">Gönder</button>
-        <ul id="mesajListesi"></ul>
-        <h3>KATILIMCILAR :</h3>
-        <div id="katilimciListesi"></div>
+        <div class="container" style="padding-top:25px;"> <!-- inline css -->
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-3" style="background-color: #261066;"> <!-- inline css -->
+                    <h3 id="katilimcilarBaslik">KATILIMCILAR</h3> <!-- inline css -->
+                    <div id="katilimciListesi"></div>
+                </div>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-9" style="height: 85vh; background-color: #0a0a33; overflow-y:scroll;"> <!-- inline css -->
+                    <ul id="mesajListesi" style="list-style-type: none; margin:0; padding:0;"></ul> <!-- inline css -->
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-3 col-sm-3 col-md-3 col-lg-3" style="background-color: #5a32cf;"> <!-- inline css -->
+                    <span>siz : <%= data.user %></span>
+                    <br>
+                    <span>oda : <%= data.room %> </span>
+                </div>
+                <div class="col-9 col-sm-9 col-md-9 col-lg-9 icerigi-yatay-dikey-ortala" style="background-color: #2e1773;"> <!-- inline css -->
+                    <input type="text" id="messageInput" placeholder="mesajınızı girin..." autocomplete="off">
+                    <button type="button" id="mesajGonderButonu">Gönder</button>
+                </div>
+            </div>
+        </div>
     </body>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -21,8 +42,8 @@
         let mesajListesi = document.getElementById("mesajListesi");
         let katilimciListesi = document.getElementById("katilimciListesi");
         
-        //kullanıcı bağlandığında oda bilgisini de server'a yollasın. bu şekilde odaya özel mesajlaşmayı ayarlarız?
-        socket.emit('odayaKatil', room); //-> bu eventi server'da dinleyip join yap.
+        //kullanıcı bağlandığında oda bilgisini de server'a yollasın.
+        socket.emit('odayaKatil', room);
         
         //kullanıcı bağlandığında server'a kimliği yolla.
         socket.emit("yeniKatilimciBaglandi", {kullaniciAdi : kullaniciAdi, oda: room});
@@ -32,10 +53,12 @@
             let messageData = {
                 message: document.getElementById("messageInput").value,
                 sender: "<%= data.user %>",
-                date: now.getHours() + ":" + now.getMinutes(),
+                date: now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds(),
                 room: room
             }
-            socket.emit('sendMessage', messageData); //sendMessage adlı bir olay oluşturup mesajla birlikte server'a at.
+            if(messageData.message !== "") { //boş mesaj atılmasını engelle.
+                socket.emit('sendMessage', messageData); //sendMessage adlı bir olay oluşturup mesajla birlikte server'a at.
+            }
             document.getElementById("messageInput").value = ""; //mesaj gönderdikten sonra input alanı temizlensin.
         });
 
@@ -44,7 +67,7 @@
             mesajListesi.innerHTML = ""; // Önceki mesajları temizle
             messageData.forEach((messageData) => {
                 const li = document.createElement('li');
-                li.textContent = messageData.sender + ":" + messageData.message + "tarih : " + messageData.date + "hangi odanın mesajı : " + messageData.room;
+                li.textContent = "[" + messageData.date + "]" + " - " + messageData.sender + " :\n" + messageData.message;
                 mesajListesi.append(li);
             });
         });
@@ -53,7 +76,6 @@
             katilimciListesi.innerHTML = '';
             for (let i = 0; i < _katilimcilar.length; i++) {
                 const katilimci = _katilimcilar[i];
-                console.log(katilimci);
                 const katilimciElement = document.createElement('div');
                 katilimciElement.textContent = katilimci.kullaniciAdi;
                 katilimciListesi.appendChild(katilimciElement);
@@ -65,7 +87,7 @@
             mesajListesi.innerHTML = ""; // Önceki mesajları temizle
             messages.forEach((messageData) => {
                 const li = document.createElement('li');
-                li.textContent = messageData.sender + ":" + messageData.message + "tarih : " + messageData.date + "hangi odanın mesajı : " + messageData.room;
+                li.textContent = "[" + messageData.date + "]" + " - " + messageData.sender + " :\n" + messageData.message;
                 mesajListesi.append(li);
             });
         });

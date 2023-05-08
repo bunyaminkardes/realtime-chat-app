@@ -2,14 +2,19 @@ const userController = {};
 const data = require("../data.js");
 
 userController.login = (req, res) => {
-    const isUserExist = data.katilimcilar.find((katilimci) => katilimci.name === req.body.kullaniciAdi);
+    const isUserExist = data.katilimcilar.find((katilimci) => katilimci.kullaniciAdi === req.body.kullaniciAdi);
     if(!isUserExist) {
-        req.session.loggedUser = req.body.kullaniciAdi;
-        req.session.room = req.body.oda;
-        res.redirect('/');
+        if(req.body.oda !== "") {
+            req.session.loggedUser = req.body.kullaniciAdi;
+            req.session.room = req.body.oda;
+            res.redirect('/');
+        }
+        else {
+            res.send("Oda seçimi yapmanız gerekiyor.");
+        }
     }
     else {
-        res.send('BÖYLE BİR KULLANICI ŞU AN VAR. BAŞKA İSİM SEÇ PLS.');
+        res.send('Böyle bir kullanıcı ismi şu anlık alınmış durumda, lütfen başka bir isim seçin.');
     }
 }
 
