@@ -20,14 +20,11 @@
         let mesajGonderButonu = document.getElementById("mesajGonderButonu");
         let mesajListesi = document.getElementById("mesajListesi");
         let katilimciListesi = document.getElementById("katilimciListesi");
-
-
-
+        
         //kullanıcı bağlandığında oda bilgisini de server'a yollasın. bu şekilde odaya özel mesajlaşmayı ayarlarız?
         socket.emit('odayaKatil', room); //-> bu eventi server'da dinleyip join yap.
-
-                //kullanıcı bağlandığında server'a kimliği yolla. #################################################
-        //socket.emit("yeniKatilimciBaglandi", "<%= data.user %>"); //##################################################
+        
+        //kullanıcı bağlandığında server'a kimliği yolla.
         socket.emit("yeniKatilimciBaglandi", {kullaniciAdi : kullaniciAdi, oda: room});
 
         mesajGonderButonu.addEventListener('click', () => {
