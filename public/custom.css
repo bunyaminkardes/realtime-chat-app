@@ -1,6 +1,21 @@
+@charset "UTF-8";
+
+/* scrollbar gözükmesin, ancak işlevi devam etsin : */
+html
+{
+    overflow:scroll;
+}
+::-webkit-scrollbar 
+{
+    width: 0px;
+    background: transparent;
+}
+/* artık scrollbar gözükmeyecek. */
+/* ---------------------------------------------------------------------------------------------- */
+
 body
 {
-    background-color: #6e6d6d !important;
+    background-color: #63406e !important;
     color:#fff !important;
 }
 .icerigi-yatay-dikey-ortala
@@ -19,9 +34,17 @@ body
     border:none;
     margin-left:10px;
 }
-
+#mesajListesi
+{
+    margin: 0;
+    padding: 0;
+    height: 500px;
+    scrollbar-width: none; /* mozillada scrollbarı gizlemek için. */
+    overflow: auto;
+}
 #mesajListesi li
 {
+    list-style-type: none;
     display: block;
     min-height: 50px;
     padding:5px;
@@ -32,8 +55,6 @@ body
     white-space: pre-line; /* js'de slash n ile alt satıra gecmek icin. */
     margin-bottom:15px;
 }
-
-
 #katilimcilarBaslik
 {
     font-size: 24px;
@@ -63,4 +84,11 @@ body
 #katilimciListesi div:hover
 {
     background-color: rgba(55, 29, 128, 0.3);
+}
+#katilimciKullaniciAdi
+{
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

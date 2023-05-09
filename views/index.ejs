@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <!--<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />-->
         <meta charset="utf-8">
         <title><%= data.title %></title>
         <link rel="stylesheet" href="custom.css">
@@ -11,19 +11,18 @@
         <div class="container" style="padding-top:25px;"> <!-- inline css -->
             <div class="row">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-3" style="background-color: #261066;"> <!-- inline css -->
-                    <h3 id="katilimcilarBaslik">KATILIMCILAR</h3> <!-- inline css -->
+                    <h3 id="katilimcilarBaslik">KATILIMCILAR</h3>
                     <div id="katilimciListesi"></div>
                 </div>
-                <div class="col-12 col-sm-12 col-md-12 col-lg-9" style="height: 85vh; background-color: #0a0a33; overflow-y:scroll;"> <!-- inline css -->
-                    <ul id="mesajListesi" style="list-style-type: none; margin:0; padding:0;"></ul> <!-- inline css -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-9" id="scroll" style="background-color: #0a0a33;"> <!-- inline css -->
+                    <ul id="mesajListesi"></ul>                   
                 </div>
             </div>
         </div>
         <div class="container">
             <div class="row">
                 <div class="col-3 col-sm-3 col-md-3 col-lg-3" style="background-color: #5a32cf;"> <!-- inline css -->
-                    <span>siz : <%= data.user %></span>
-                    <br>
+                    <span id="katilimciKullaniciAdi">siz : <%= data.user %></span>
                     <span>oda : <%= data.room %> </span>
                 </div>
                 <div class="col-9 col-sm-9 col-md-9 col-lg-9 icerigi-yatay-dikey-ortala" style="background-color: #2e1773;"> <!-- inline css -->
@@ -38,17 +37,19 @@
         let socket = io();
         let kullaniciAdi = "<%= data.user %>";
         let room = "<%= data.room %>";
+        let mesajInputu = document.getElementById("messageInput");
         let mesajGonderButonu = document.getElementById("mesajGonderButonu");
         let mesajListesi = document.getElementById("mesajListesi");
         let katilimciListesi = document.getElementById("katilimciListesi");
-        
+        let scrollBar = document.getElementById("mesajListesi");
+
         //kullanıcı bağlandığında oda bilgisini de server'a yollasın.
         socket.emit('odayaKatil', room);
         
         //kullanıcı bağlandığında server'a kimliği yolla.
         socket.emit("yeniKatilimciBaglandi", {kullaniciAdi : kullaniciAdi, oda: room});
 
-        mesajGonderButonu.addEventListener('click', () => {
+        const mesajGonder = () => {
             const now = new Date();
             let messageData = {
                 message: document.getElementById("messageInput").value,
@@ -60,6 +61,17 @@
                 socket.emit('sendMessage', messageData); //sendMessage adlı bir olay oluşturup mesajla birlikte server'a at.
             }
             document.getElementById("messageInput").value = ""; //mesaj gönderdikten sonra input alanı temizlensin.
+        };
+
+        mesajInputu.addEventListener('keyup', function(event) {
+            if(event.keyCode === 13) {
+                event.preventDefault();
+                mesajGonder();
+            }
+        });
+
+        mesajGonderButonu.addEventListener('click', () => {
+            mesajGonder();
         });
 
         //sunucuda receiveMessage adlı bir olay tetiklenirse bu kod parçası çalışacak :
@@ -70,6 +82,7 @@
                 li.textContent = "[" + messageData.date + "]" + " - " + messageData.sender + " :\n" + messageData.message;
                 mesajListesi.append(li);
             });
+            scrollBar.scrollTop = scrollBar.scrollHeight; //mesaj geldikçe mesaj kutusunun en aşağısına scrolla.
         });
 
         socket.on('katilimciListele', (_katilimcilar) => {
@@ -90,6 +103,7 @@
                 li.textContent = "[" + messageData.date + "]" + " - " + messageData.sender + " :\n" + messageData.message;
                 mesajListesi.append(li);
             });
+            scrollBar.scrollTop = scrollBar.scrollHeight; //sayfa yenilendiğinde mesaj kutusunun en aşağısına scrolla.
         });
     </script>
 </html>
