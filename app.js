@@ -51,7 +51,6 @@ io.on('connection', (socket) => {
         
         const mesajFiltresi = data.messages.filter((message) => message.room === _katilimci.oda);
         //herhangi biri bağlandığında son mesajları görmesi için ilgili istemcideki olayı tetikle.
-        //const mesajFiltresi = data.messages.filter((message) => message.room === socket.room);
         socket.emit('mesajlariYukle', mesajFiltresi);
     });
 

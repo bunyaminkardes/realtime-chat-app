@@ -4,6 +4,7 @@
 html
 {
     overflow:scroll;
+    scrollbar-width: none;
 }
 ::-webkit-scrollbar 
 {
@@ -38,7 +39,7 @@ body
 {
     margin: 0;
     padding: 0;
-    height: 500px;
+    height: 85vh;
     scrollbar-width: none; /* mozillada scrollbarı gizlemek için. */
     overflow: auto;
 }
