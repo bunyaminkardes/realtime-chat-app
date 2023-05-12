@@ -4,18 +4,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta charset="utf-8">
         <title> <%= title %> </title>
+        <link rel="stylesheet" href="custom.css">
+        <link rel="stylesheet" href="bootstrap.4.0.0.min.css">
     </head>
     <body>
-        <h3>chat yapmaya başlamak için giriş yap!</h3>
-        <form action="login" method="post" autocomplete="off">
-            <input type="text" name="kullaniciAdi" id="kullaniciAdi" placeholder="lütfen bir kullanıcı adı seçin.">
-            <select name="oda">
-                <option value="">Lütfen katılmak üzere bir oda seçin</option>
-                <option value="oda1">oda 1</option>
-                <option value="oda2">oda 2</option>
-                <option value="oda3">oda 3</option>
-            </select>
-            <input type="submit" id="joinChatButton" value="Sohbete katıl!">
-        </form>
+        <div class="login-form-container">
+            <form class="login-form" action="login" method="post" autocomplete="off">
+                <h3 class="login-form-baslik">Chat yapmaya başlamak için giriş yap!</h3>
+                <input class="login-form-username" type="text" name="kullaniciAdi" id="kullaniciAdi" placeholder="lütfen bir kullanıcı adı seçin.">
+                <select class="login-form-oda" name="oda">
+                    <option value="">Lütfen katılmak üzere bir oda seçin</option>
+                    <option value="oda1">oda 1</option>
+                    <option value="oda2">oda 2</option>
+                    <option value="oda3">oda 3</option>
+                </select>
+                <input class="login-form-buton" type="submit" id="joinChatButton" value="Sohbete katıl!">
+            </form>
+        </div>
     </body>
 </html>
