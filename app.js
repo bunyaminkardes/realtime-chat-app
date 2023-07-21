@@ -4,7 +4,8 @@ const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
-const router = require("./routes.js");
+const pageRoutes = require("./routes/pageRoutes"); //route
+const userRoutes = require("./routes/userRoutes.js"); //route
 const data = require("./data.js");
 
 const bodyParser = require('body-parser');
@@ -19,7 +20,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-app.use('/', router);
+app.use('/', pageRoutes); //route
+app.use('/user', userRoutes); //route
 
 //herhangi biri bağlandığında bu kod parçası çalışacak :
 io.on('connection', (socket) => {
