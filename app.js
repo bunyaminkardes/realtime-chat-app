@@ -2,14 +2,13 @@ require("dotenv").config();
 
 const express = require("express");
 const app = express();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
-const pageRoutes = require("./routes/pageRoutes"); //route
-const userRoutes = require("./routes/userRoutes.js"); //route
+const pageRoutes = require("./routes/pageRoutes");
+const userRoutes = require("./routes/userRoutes.js");
 const data = require("./data.js");
-
 const bodyParser = require('body-parser');
 const session = require("express-session");
+const server = require("http").createServer(app); //socket.io
+const io = require("socket.io")(server); //socket.io
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -20,8 +19,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-app.use('/', pageRoutes); //route
-app.use('/user', userRoutes); //route
+app.use('/', pageRoutes);
+app.use('/user', userRoutes);
 
 //herhangi biri bağlandığında bu kod parçası çalışacak :
 io.on('connection', (socket) => {

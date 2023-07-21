@@ -1,7 +1,7 @@
 const pageController = {};
 
 pageController.getIndexPage = (req, res) => {
-    if(!req.session.loggedUser) {
+    if(!req.session.loggedUser) { //giriş yapmayan user chat sayfasını görüntüleyemez.
         res.redirect('/login');
     }
     else {
