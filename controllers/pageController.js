@@ -1,10 +1,10 @@
 const pageController = {};
 
 pageController.getIndexPage = (req, res) => {
-    if(!req.session.loggedUser) { //giriş yapmayan user chat sayfasını görüntüleyemez.
+    if(!req.session.loggedUser) { //giriş yapılmadıysa login sayfasına yönlendir.
         res.redirect('/login');
     }
-    else {
+    else { //giriş yapıldıysa gerekli tüm bilgileri index.ejs'e yolla.
         const data = {
             title : 'realtime chat app',
             user : req.session.loggedUser,

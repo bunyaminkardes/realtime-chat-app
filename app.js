@@ -19,8 +19,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-app.use('/', pageRoutes);
-app.use('/user', userRoutes);
+app.use('/', pageRoutes); // "/" ile başlayan tüm istekleri pageRoutes'a yönlendir.
+app.use('/user', userRoutes); // "/user" ile başlayan tüm istekleri userRoutes'a yönlendir.
 
 //herhangi biri bağlandığında bu kod parçası çalışacak :
 io.on('connection', (socket) => {
